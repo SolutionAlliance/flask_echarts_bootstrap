@@ -1,0 +1,167 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.3.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <style>
+        body {
+            padding: 20px;
+        }
+
+        #companyChart {
+            width: 100%;
+            height: 400px;
+        }
+
+        .form-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            /* 将 right 改为 left 以定位到左上角 */
+            width: 200px;
+            background-color: white;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            cursor: move;/* 添加鼠标指针样式，表示可拖动 */
+            border-radius: 8px; /* 圆角半径为8px */
+        }
+
+        .form-group label {
+            font-size: 14px;
+        }
+
+        .form-group select {
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 级联查询 -->
+    <div class="form-container" id="draggable-form">
+
+        <h6 class="text-center text-primary collapse-title" data-toggle="collapse" data-target="#cascading-form"
+            aria-expanded="true" aria-controls="cascading-form">级联查询 <span>&#x25BC;</span></h6>
+        <div class="collapse" id="cascading-form">
+            <form>
+                <div class="form-group">
+                    <label for="proList">二级域名：</label>
+                    <select class="form-control" id="proList">
+                        <option>--二级域名--</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="cityList">三级域名：</label>
+                    <select class="form-control" id="cityList">
+                        <option value="1">石家庄</option>
+                    </select>
+                </div>
+                <button type="button" class="btn btn-primary" onclick="searchCompanies()">查询域名</button>
+            </form>
+        </div>
+
+        <h6 class="text-center text-primary collapse-title" data-toggle="collapse" data-target="#non-cascading-form"
+            aria-expanded="false" aria-controls="non-cascading-form">查询节点名称 <span>&#x25BC;</span></h6>
+        <div class="collapse" id="non-cascading-form">
+            <form>
+                <div class="form-group">
+                    <label for="cityId">节点名称</label>
+                    <input type="text" class="form-control" id="cityId" placeholder="请输入节点名称">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="searchCompaniesNonCascading()">查询节点名称</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 公司信息展示 -->
+    <div id="companyChart" class="mt-4"></div>
+</body>
+
+<script type="text/javascript">
+    // 使表单容器可拖动
+    $("#draggable-form").draggable();
+    //定义加载省份信息函数
+    function loadProList() {
+        $("#proList").empty();//每次查询前，先清空原有子对象
+        $.ajax({
+            url: "/findAllProList",
+            dataType: "json",
+            success: function (resp) {
+                $.each(resp, function (index, element) {
+                    $("#proList").append("<option value='" + element.id + "'>" + element.name + "</option>");
+                })
+            }
+        })
+    }
+
+    $(function () {
+        //当页面加载完毕时加载省份信息
+        loadProList()
+        //监听省份列表改变事件
+        $("#proList").change(function () {
+            $("#cityList").empty();
+            var proId = $("#proList>option:selected").val();
+            $.get("/findAllCityList", { "proId": proId }, addCityOption, "json")
+        })
+        searchCompanies()
+    })
+
+    function addCityOption(resp) {
+        $.each(resp, function (index, element) {
+            $("#cityList").append("<option value=" + element.cityId + ">" + element.cityName + "</option>")
+        })
+    }
+
+    function searchCompanies() {
+        var cityId = $("#cityList>option:selected").val();
+        $.get("/findCompanies", { "cityId": cityId }, displayCompanies, "json");
+    }
+
+    function searchCompaniesNonCascading() {
+        var cityId = $("#cityId").val();
+        $.get("/findCompanies", { "cityId": cityId }, displayCompanies, "json");
+    }
+    function displayCompanies(resp) {
+        var companyNames = resp.map(function (element) {
+            return element.companyName;
+        });
+
+        var companyChart = echarts.init(document.getElementById('companyChart'));
+
+        var option = {
+            title: {
+                text: '公司信息'
+            },
+            tooltip: {},
+            xAxis: {
+                data: companyNames
+            },
+            yAxis: {},
+            series: [{
+                name: '公司',
+                type: 'bar',
+                data: companyNames.map(function () {
+                    return 1; // 每个公司显示一个条形图，值为1
+                })
+            }]
+        };
+
+        companyChart.setOption(option);
+    }
+
+</script>
+
+
+</html>

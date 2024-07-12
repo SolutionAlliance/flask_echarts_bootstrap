@@ -1,0 +1,442 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <style>
+        #chart-panel {
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            bottom: 0;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+    <script src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+
+</head>
+
+<body>
+    <div class="tree-container">
+        <input type="text" id="inputSearch" placeholder="请输入节点名称"><button id="btnSearch">搜索</button>
+        <input type="text" id="note_type_inputSearch" placeholder="请输入节点类型"><button id="note_type_Search">搜索</button>
+    </div>
+    <div id="chart-panel" style="margin-top:30px"></div>
+</body>
+    <script type="text/javascript"> 
+        var myChart = echarts.init(document.getElementById('chart-panel'));
+        function generateTableHtml_series(params) {
+            var name = params.name;
+            if (name.length > 20) {
+                return name.substring(0, 20) + '...';
+            } else {
+                return name;
+            }
+        }
+        function generateTableHtml_tooltip(params) {
+            var data = params.data.data;
+            var dataStr = '';
+
+            function wrapString(str, maxLength) {
+                if (!str) {
+                    return '';
+                }
+                var result = '';
+                for (var i = 0; i < str.length; i += maxLength) {
+                    result += str.substring(i, i + maxLength) + '<br>';
+                }
+                return result;
+            }
+
+            for (var key in data) {
+                if (data.hasOwnProperty(key)) {
+                    dataStr += `
+                <tr>
+                    <td style="padding: 0 20px 5px 20px; word-break: break-all; border: 1px solid #ccc;">${key}</td>
+                    <td style="padding: 0 20px 5px 20px; word-break: break-all; border: 1px solid #ccc;">${wrapString(data[key], 20)}</td>
+                </tr>`;
+                }
+            }
+
+            return `
+        <div style="font-size: 15px; font-weight: bold; padding: 10px 20px; word-break: break-all; border-bottom: 1px solid #ccc;">节点名称: ${wrapString(params.data.name, 50)}</div>
+        <div style="font-size: 15px; font-weight: bold; padding: 10px 20px; word-break: break-all; border-bottom: 1px solid #ccc;">节点类型: ${wrapString(params.data.type, 20)}</div>
+        <table style="width: 100%; border-collapse: collapse; border: 1px solid #ccc;">
+            <tbody>
+                ${dataStr}
+            </tbody>
+        </table>`;
+        }
+
+        const data = {
+            "direction": "downward",
+            "name": "origin",
+            "symbol": 'image://image/dns.png',
+            "data": {
+                "domain": "sd.cn"
+            },
+            "children": [
+                {
+                    "name": "slm-cdn-test",
+                    "type": "CNAME",
+                    "hasHumanholding": true,
+                    "hasChildren": true,
+                    "isExpand": false,
+                    "symbol": 'image://image/cname.png',
+                    "data": {
+                        "domain": "slm-cdn-test.cn.cdn.com",
+                        "cname": "slm-cdn-test.cn.cdn.com",
+                        "account": "腾讯云大中台",
+                    },
+                    "children": [
+                        {
+                            "name": "az-infra-zbxplb-01",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        },
+                        {
+                            "name": "kubernetes-internal",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "11.5.97.47",
+                    "type": "A",
+                    "hasHumanholding": true,
+                    "hasChildren": true,
+                    "isExpand": false,
+                    "symbol": 'image://image/dns.png',
+                    "children": [
+                        {
+                            "name": "CNAZPBXTUATAGW01",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        },
+                        {
+                            "name": "monitor-zbx-ilb-1",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "152.14.29.15",
+                    "type": "A",
+                    "hasHumanholding": true,
+                    "hasChildren": true,
+                    "isExpand": false,
+                    "symbol": 'image://image/dns.png',
+                    "children": [
+                        {
+                            "name": "epop-web-PublicLoadBalancer",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        },
+                        {
+                            "name": "TestPortal-PublicLoadBalancer",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "cname-crm.niucrm.com",
+                    "hasHumanholding": false,
+                    "hasChildren": true,
+                    "type": "CNAME",
+                    "symbol": 'image://image/cname.png',
+                    "children": []
+                },
+                {
+                    "name": "store-img.cn.cdn.com",
+                    "hasHumanholding": false,
+                    "hasChildren": true,
+                    "isExpand": false,
+                    "type": "CNAME",
+                    "symbol": 'image://image/cname.png',
+                    "children": [
+                        {
+                            "name": "HFMDEV01-PublicLoadBalancer",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": [
+                                {
+                                    "name": "Nginx-DBProxy",
+                                    "hasHumanholding": false,
+                                    "hasChildren": true,
+                                    "type": "nginx",
+                                    "symbol": 'image://image/nginx.png',
+                                    "children": []
+                                },
+                                {
+                                    "name": "1.1.1.1",
+                                    "hasHumanholding": false,
+                                    "hasChildren": true,
+                                    "type": "vm",
+                                    "symbol": 'image://image/vm.png',
+                                    "children": []
+                                }
+                            ]
+                        },
+                        {
+                            "name": "HFMDEV01-PublicLoadBalancer",
+                            "hasHumanholding": false,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        },
+                        {
+                            "name": "HFMDEV01-PublicLoadBalancer",
+                            "hasHumanholding": false,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        },
+                        {
+                            "name": "HFMDEV01-PublicLoadBalancer",
+                            "hasHumanholding": false,
+                            "type": "LB",
+                            "symbol": 'image://image/lb.png',
+                            "children": []
+                        }
+                    ]
+                },
+                {
+                    "name": "slm-cdn-test.cn.cdn.dnsv2.com",
+                    "type": "CNAME",
+                    "hasHumanholding": true,
+                    "hasChildren": true,
+                    "isExpand": false,
+                    "data": {
+                        "domain": "slm-cdn-test.cn.cdn.com",
+                        "cname": "slm-cdn-test.cn.cdn.com",
+                        "account": "腾讯云大中台",
+                    },
+                    "symbol": 'image://image/cname.png',
+                    "children": [
+                        {
+                            "name": "az-infra-zbxplb-01",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "LB",
+                            "symbol": 'image://image/dns.png',
+                            "children": []
+                        },
+                        {
+                            "name": "kubernetes-internal-f5",
+                            "hasHumanholding": false,
+                            "hasChildren": true,
+                            "type": "f5",
+                            "symbol": 'image://image/f5.png',
+                            "children": []
+                        }
+                    ]
+                },
+            ]
+        }
+        var option = {
+            title: {
+                text: '全链路拓扑图',
+                subtext: 'v1.1.1',
+                left: 'right',
+                top: 'bottom',
+                textAlign: 'left',
+                textVerticalAlign: 'bottom',
+                subtextStyle: {
+                    align: 'right',
+                    verticalAlign: 'bottom'
+                }
+            },
+            toolbox: {
+                show: true,
+                feature: {
+                    mark: { show: true },
+                    restore: { show: true },
+                    saveAsImage: { show: true }
+                }
+            },
+            tooltip: {
+                trigger: 'item',
+                formatter: function (params) {
+                    return generateTableHtml_tooltip(params);
+                }
+            },
+            series: [{
+                type: 'tree',
+                data: [data],
+                top: '10%',
+                left: '5%',
+                bottom: '10%',
+                right: '5%',
+                layout: 'orthogonal',
+                orient: 'vertical',
+                symbolSize: 50,
+                nodeOverlap: true,
+                symbol: 'emptyCircle',
+                zoom: 1,
+                scaleLimit: {
+                    min: 0.7,
+                    max: 5
+                },
+                labelLayout: {
+                    hideOverlap: true
+                },
+                label: {
+                    position: 'top',
+                    backgroundColor: '#F4F4F4',
+                    borderRadius: [0, 0, 5, 5],
+                    align: 'center',
+                    formatter: function (params) {
+                        return generateTableHtml_series(params);
+                    },
+                    rich: {
+                        first: {
+                            width: 150,
+                            padding: [5, 10],
+                            lineHeight: 20,
+                        },
+                        second: {
+                            color: '#888',
+                            align: 'center',
+                            lineHeight: 10,
+                        },
+                    }
+                },
+                leaves: {
+                    label: {
+                        position: 'top',
+                        verticalAlign: 'middle',
+                        align: 'center'
+                    }
+                },
+                emphasis: {
+                    focus: 'descendant'
+                },
+                roam: true,
+                expandAndCollapse: true,
+                animationDuration: 550,
+                animationDurationUpdate: 750,
+                initialTreeDepth: 100,
+                itemStyle: {
+                    borderColor: 'green',
+                    borderWidth: 2
+                }
+            }]
+
+        };
+
+        setTimeout(function () {
+            $(myChart).resize();
+        }, 200);
+
+        $(window).on('click', function () {
+            $(myChart).resize();
+        });
+        myChart.setOption(option);
+        $("#btnSearch").on('click', function () {
+            console.log('data', data)
+            var num = 0;
+            function readNodes(nodes) {
+                for (let item of nodes) {
+                    if (item.children && item.children.length) {
+                        readNodes(item.children)
+                    }
+                    if (item.name.indexOf($("#inputSearch").val()) >= 0 && $("#inputSearch").val() != '') {
+                        console.log(item.name)
+                        item.label = {
+                            color: 'red',
+                            fontSize: '15'
+                        };
+                        num++;
+                    } else {
+                        item.label = {
+                            color: '#666',
+                            fontSize: '9'
+                        };
+                    }
+                }
+            }
+            readNodes([data])
+            if (num > 0) {
+                option.series[0].initialTreeDepth = -1;
+            } else {
+                option.series[0].initialTreeDepth = 2;
+            }
+            myChart.setOption(option);
+        });
+
+        $("#note_type_Search").on('click', function () {
+            console.log('data', data)
+            var num = 0;
+            function readNodes(nodes) {
+                for (let item of nodes) {
+                    if (item.children && item.children.length) {
+                        readNodes(item.children)
+                    }
+                    if (item.type == undefined) {
+                        console.log(item.type)
+                        item.label = {
+                            color: '#666',
+                            fontSize: '9'
+                        };
+                    }
+                    else if (item.type.includes($("#note_type_inputSearch").val()) && $("#note_type_inputSearch").val() != '') {
+                        console.log(item.name)
+                        item.label = {
+                            color: 'red',
+                            fontSize: '15'
+                        };
+                        num++;
+                    } else {
+                        item.label = {
+                            color: '#666',
+                            fontSize: '9'
+                        };
+
+                    }
+                }
+            }
+            readNodes([data])
+            if (num > 0) {
+                option.series[0].initialTreeDepth = -1;
+            } else {
+                option.series[0].initialTreeDepth = 2;
+            }
+            myChart.setOption(option);
+        });
+        $('.tree-container').keydown(function (event) {
+            if (event.keyCode == 13) {
+                $("#btnSearch").click();
+            }
+        });
+
+
+    </script>
+</body>
+
+</html>
